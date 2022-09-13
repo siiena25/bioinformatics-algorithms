@@ -37,33 +37,39 @@ fun main(args: Array<String>) {
 }
 
 fun calcPercents(data: ArrayList<Data>, indexOfElement: Int) {
-    writeFile.appendText("Sample: ${data[indexOfElement]}\n\n", Charsets.UTF_8)
+    val sb = StringBuilder("Sample: ${data[indexOfElement]}\n")
+    val result = arrayListOf<Pair<Data, Double>>()
     for (i in 0 until data.size) {
-        writeFile.appendText("Element to compare: ${data[i]}\n", Charsets.UTF_8)
         val str1 = data[i].stringToCompare
         val str2 = data[indexOfElement].stringToCompare
         val substrings: MutableMap<String, MutableSet<Int>> = getListOfSubstringsFromString(str1)
 
         var res = 0
-        var i = 0
-        while (i + substringLength < str2.length) {
-            val currentSubstring = str2.substring(i, i + substringLength)
+        var j = 0
+        while (j + substringLength < str2.length) {
+            val currentSubstring = str2.substring(j, j + substringLength)
             if (substrings[currentSubstring] != null) {
                 ++res
-                for(j in -substringLength + 1 until substringLength) {
-                    val pos = substrings[currentSubstring]!!.first() + j
+                for(k in -substringLength + 1 until substringLength) {
+                    val pos = substrings[currentSubstring]!!.first() + k
                     if (pos >= 0 && pos + substringLength - 1 < str1.length) {
                         val cur2 = str1.substring(pos, pos + substringLength)
                         substrings[cur2]!!.drop(pos)
                     }
                 }
-                i += substringLength - 1
+                j += substringLength - 1
             }
-            ++i
+            ++j
         }
-
-        writeFile.appendText((2.00 * substringLength * res * 100 / (str1.length + str2.length)).toString() + "%\n\n", Charsets.UTF_8)
+        result.add(Pair(data[i], (2.00 * substringLength * res * 100 / (str1.length + str2.length))))
     }
+    result.apply {
+        sortByDescending { it.second }
+        sb.append(joinToString { elem ->
+            "\n\n${elem.first.additionalData}\n${elem.first.stringToCompare}\n${elem.second}%"
+        })
+    }
+    writeFile.appendText(sb.toString(), Charsets.UTF_8)
 }
 
 fun getListOfSubstringsFromString(str: String): MutableMap<String, MutableSet<Int>> {
