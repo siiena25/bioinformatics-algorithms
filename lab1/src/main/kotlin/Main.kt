@@ -42,26 +42,30 @@ fun calcPercents(data: ArrayList<Data>, indexOfElement: Int) {
     for (i in 0 until data.size) {
         val str1 = data[i].stringToCompare
         val str2 = data[indexOfElement].stringToCompare
-        val substrings: MutableMap<String, MutableSet<Int>> = getListOfSubstringsFromString(str1)
 
-        var res = 0
-        var j = 0
-        while (j + substringLength < str2.length) {
-            val currentSubstring = str2.substring(j, j + substringLength)
-            if (substrings[currentSubstring] != null) {
-                ++res
-                for(k in -substringLength + 1 until substringLength) {
-                    val pos = substrings[currentSubstring]!!.first() + k
-                    if (pos >= 0 && pos + substringLength - 1 < str1.length) {
-                        val cur2 = str1.substring(pos, pos + substringLength)
-                        substrings[cur2]!!.drop(pos)
+        if (str1 == str2) {
+            result.add(Pair(data[i], 100.0))
+        } else {
+            val substrings: MutableMap<String, MutableSet<Int>> = getListOfSubstringsFromString(str1)
+            var res = 0
+            var j = 0
+            while (j + substringLength < str2.length) {
+                val currentSubstring = str2.substring(j, j + substringLength)
+                if (substrings[currentSubstring] != null) {
+                    ++res
+                    for(k in -substringLength + 1 until substringLength) {
+                        val pos = substrings[currentSubstring]!!.first() + k
+                        if (pos >= 0 && pos + substringLength - 1 < str1.length) {
+                            val cur2 = str1.substring(pos, pos + substringLength)
+                            substrings[cur2]!!.drop(pos)
+                        }
                     }
+                    j += substringLength - 1
                 }
-                j += substringLength - 1
+                ++j
             }
-            ++j
+            result.add(Pair(data[i], (2.00 * substringLength * res * 100 / (str1.length + str2.length))))
         }
-        result.add(Pair(data[i], (2.00 * substringLength * res * 100 / (str1.length + str2.length))))
     }
     result.apply {
         sortByDescending { it.second }
